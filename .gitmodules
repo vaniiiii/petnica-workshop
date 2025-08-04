@@ -1,0 +1,6 @@
+[submodule "2025/streaming-contract-solution/test/lib/forge-std"]
+	path = 2025/streaming-contract-solution/test/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "2025/streaming-contract-solution/tests/lib/openzeppelin-contracts"]
+	path = 2025/streaming-contract-solution/tests/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
