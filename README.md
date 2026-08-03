@@ -89,9 +89,8 @@ This is why a lot of real-world asset and finance activity happens on Ethereum o
 
 - BlackRock launched its first tokenized fund, BUIDL, on Ethereum in 2024.
 - Robinhood launched stock tokens in the EU on Arbitrum, an Ethereum L2, and has announced plans for its own Arbitrum-based L2.
-- Stablecoin/payment-focused infrastructure such as Tempo shows payments are becoming a major onchain use case in their own right — which doesn't mean a payments app needs its own chain, it means payment companies want things that are hard to guarantee at the application layer: predictable fees, stablecoin gas, fast finality, compliance hooks.
 
-Sources: [BlackRock BUIDL launch](https://www.businesswire.com/news/home/20240320771318/en/BlackRock-Launches-Its-First-Tokenized-Fund-BUIDL-on-the-Ethereum-Network) · [Robinhood stock tokens and Arbitrum](https://robinhood.com/us/en/newsroom/robinhood-launches-stock-tokens-reveals-layer-2-blockchain-and-expands-crypto-suite-in-eu-and-us-with-perpetual-futures-and-staking/) · [Tempo](https://tempo.xyz/)
+Sources: [BlackRock BUIDL launch](https://www.businesswire.com/news/home/20240320771318/en/BlackRock-Launches-Its-First-Tokenized-Fund-BUIDL-on-the-Ethereum-Network) · [Robinhood stock tokens and Arbitrum](https://robinhood.com/us/en/newsroom/robinhood-launches-stock-tokens-reveals-layer-2-blockchain-and-expands-crypto-suite-in-eu-and-us-with-perpetual-futures-and-staking/)
 
 <p align="right">(<a href="#table-of-contents">back to top</a>) ⬆️</p>
 
