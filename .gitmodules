@@ -4,3 +4,9 @@
 [submodule "2025/streaming-contract-solution/tests/lib/openzeppelin-contracts"]
 	path = 2025/streaming-contract-solution/tests/lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "2026/lib/forge-std"]
+	path = 2026/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "2026/lib/openzeppelin-contracts"]
+	path = 2026/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
