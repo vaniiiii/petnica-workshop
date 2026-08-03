@@ -186,14 +186,3 @@ contract MicroCDP is IMicroCDP {
         if (!success) revert EthTransferFailed();
     }
 }
-
-
-// oracle problem? (prediction markets)
-// why people use the stablecoin for?
-// leverage? 
-// liquid staking? different collaterals
-// stable to some other token, we use dex/exchange.
-// ethena/usdai
-// spark
-// tokenized assets/tokenization
-// crypto cards

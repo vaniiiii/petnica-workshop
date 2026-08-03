@@ -33,6 +33,25 @@
 </details>
 
 <details>
+  <summary><a href="#6-defi-context">6. DeFi Context</a></summary>
+  <ol>
+    <li><a href="#the-oracle-problem-and-prediction-markets">The Oracle Problem (And Prediction Markets)</a></li>
+    <li><a href="#why-people-actually-use-stablecoins">Why People Actually Use Stablecoins</a></li>
+    <li><a href="#leverage">Leverage</a></li>
+    <li><a href="#liquid-staking-and-other-collateral-types">Liquid Staking And Other Collateral Types</a></li>
+    <li><a href="#pegging-to-something-other-than-usd">Pegging To Something Other Than USD</a></li>
+    <li><a href="#ethenausdai-synthetic-dollar-designs">Ethena/USDAi: Synthetic Dollar Designs</a></li>
+    <li><a href="#spark">Spark</a></li>
+    <li><a href="#tokenized-assets--rwas">Tokenized Assets / RWAs</a></li>
+    <li><a href="#crypto-cards">Crypto Cards</a></li>
+  </ol>
+</details>
+
+<details>
+  <summary><a href="#7-beyond-the-toy-cdp-what-production-stablecoins-solve">7. Beyond The Toy CDP: What Production Stablecoins Solve</a></summary>
+</details>
+
+<details>
   <summary><a href="#repo-structure">Repo Structure</a></summary>
 </details>
 
@@ -148,7 +167,7 @@ The idea: deposit ETH into the protocol, and the protocol gives you a stablecoin
 
 This design — mint a stablecoin against locked collateral, track it as debt — is called a **Collateralized Debt Position (CDP)**.
 
-One missing piece: how does a contract know the price of ETH? It needs an **oracle** — that turns out to be its own hard problem.
+One missing piece: how does a contract know the price of ETH? It needs an **oracle** — more on why that's its own hard problem in [Section 6](#the-oracle-problem-and-prediction-markets).
 
 <p align="right">(<a href="#table-of-contents">back to top</a>) ⬆️</p>
 
@@ -180,9 +199,109 @@ Concepts: collateral, debt, oracle price, collateral ratio, liquidation threshol
 
 **Main point:** a CDP stablecoin is lending in reverse. Instead of borrowing an existing stablecoin from lenders, the protocol *mints* debt against collateral.
 
-`MicroCDP` (in `src/MicroStable.sol`) is intentionally small — it omits interest, governance, debt ceilings, oracle fallbacks, partial liquidation, and bad-debt handling.
+`MicroCDP` (in `src/MicroStable.sol`) is intentionally small — it omits interest, governance, debt ceilings, oracle fallbacks, partial liquidation, and bad-debt handling. See [Section 7](#7-beyond-the-toy-cdp-what-production-stablecoins-solve) for what that means in practice.
 
 See `src/interfaces/IMicroCDP.sol`, `src/interfaces/IUnstableUSD.sol`, and `src/MicroStable.sol` / `src/UnstableUSD.sol`.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>) ⬆️</p>
+
+# 6. DeFi Context
+
+`MicroCDP` is a single, narrow example. Here's how it connects to the wider DeFi landscape.
+
+## The Oracle Problem (And Prediction Markets)
+
+Every price check in `MicroCDP` trusts one oracle (`collateralPrice()`), with a staleness check and nothing else — no fallback feed, no circuit breaker, no manipulation resistance. Real protocols worry about oracle delay, flash crashes, and manipulated single sources, and typically combine multiple feeds (e.g. Chainlink) with sanity checks.
+
+This is the same underlying problem prediction markets face: how do you get real-world truth (a price, an election result, a game outcome) onto a deterministic chain in a way people can trust? Oracles and prediction market resolution mechanisms (like Polymarket's) are solving the same class of problem from different angles.
+
+## Why People Actually Use Stablecoins
+
+Not just "because crypto is volatile." Concretely: pricing salaries and invoices in a stable unit, a stable base for trading and collateral, a place to park value between trades, and settlement/payments that don't need a bank.
+
+## Leverage
+
+A CDP isn't just for spending — it's a leverage primitive:
+
+```text
+1. Deposit ETH.
+2. Borrow stablecoin.
+3. Buy more ETH with it.
+4. Deposit that ETH too.
+5. Borrow more.
+```
+
+Each loop increases ETH exposure, but also compresses the collateral ratio — a smaller price drop can now liquidate the position. Leverage amplifies both directions.
+
+## Liquid Staking And Other Collateral Types
+
+`MicroCDP` only accepts ETH as collateral. Production protocols accept many collateral types — wstETH/stETH (staked ETH that keeps earning yield while locked as collateral), cbBTC, sUSDe, and even other stablecoins — each with its own liquidity, oracle, and smart-contract risk profile.
+
+## Pegging To Something Other Than USD
+
+`UUSD` targets $1, but the underlying mechanism — mint against collateral, let arbitrage pull the price back to target — doesn't require the target to be USD. The same idea can peg to another token, a basket, or a commodity, maintained through DEX/exchange arbitrage rather than a dollar-specific mechanism.
+
+## Ethena/USDAi: Synthetic Dollar Designs
+
+`MicroCDP` is a simple overcollateralized CDP. Ethena's USDe and similar designs (USDAi) take a different synthetic-dollar approach: delta-neutral hedged positions (long spot collateral, short a matching perp) instead of pure overcollateralization. Same goal — a dollar without a bank — different risk model.
+
+## Spark
+
+Spark is Sky's (Maker's) own lending arm, built on top of the DAI/USDS stablecoin and its liquidity. It's a concrete example of a CDP stablecoin issuer expanding into lending markets rather than staying a single-purpose mint.
+
+## Tokenized Assets / RWAs
+
+BlackRock's BUIDL, Ondo's tokenized treasuries, and tokenized stocks (e.g. Robinhood's EU stock tokens, xStocks) bring traditional financial assets onchain so they can move and compose with DeFi the same way a stablecoin does.
+
+## Crypto Cards
+
+Stablecoins and other onchain assets still need to reach everyday spending. Crypto debit cards (Coinbase Card and similar) are the "last mile" — spend from an onchain balance as if it were a normal bank card.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>) ⬆️</p>
+
+# 7. Beyond The Toy CDP: What Production Stablecoins Solve
+
+It's tempting to describe `MicroCDP`'s gaps as "missing features." It's more accurate to say a production stablecoin protocol has to solve **ten mostly-independent economic problems**, each with its own real-world answers:
+
+### 1. Solvency
+
+**Is there enough collateral to back every outstanding stablecoin?** `MicroCDP` only has overcollateralization (150%) and liquidations (10% bonus) — no answer for oracle delay, flash crashes, or a liquidator simply refusing to touch an underwater position. Real protocols add a Stability Pool (Liquity), collateral auctions (Maker), debt redistribution (Liquity), a protocol surplus buffer, and debt auctions/recapitalization.
+
+### 2. Peg Stability
+
+**Why should 1 stablecoin = $1?** `MicroCDP` only relies on borrower arbitrage: below peg, borrowers buy UUSD to repay and burn it; above peg, users mint and sell it. That's exactly how old Maker worked. Modern protocols add stronger mechanisms: a Peg Stability Module (Maker, Sky/Spark), redemptions (Liquity), stability fees, and a savings rate (Sky).
+
+### 3. Liquidation Liquidity
+
+**Even when a position becomes unhealthy, who actually shows up with stablecoins to liquidate it?** `MicroCDP` just assumes a liquidator magically owns UUSD. Without deep liquidity, an unhealthy position can sit unliquidated indefinitely. Real solutions: a Stability Pool, keeper incentives, flash-loan liquidations, deep DEX liquidity, and dedicated auction keepers.
+
+### 4. Stablecoin Demand
+
+**Why hold it instead of selling it immediately?** This is probably the single biggest thing a toy CDP glosses over — every borrower mints because they want ETH/USDC/BTC, not UUSD, so every borrow creates immediate selling pressure. Demand has to come from somewhere: debt repayment, liquidations, savings yield, LP rewards, lending markets, trading pairs, payments, or use as collateral elsewhere.
+
+### 5. Stablecoin Supply
+
+**Who's allowed to create it?** `MicroCDP` only lets ETH borrowers mint, which caps growth. Real protocols expand supply through a PSM (mint 1:1 against another stablecoin), institutional credit lines (Sky/Spark), and additional collateral branches (Liquity).
+
+### 6. Capital Efficiency
+
+Safety and borrowing power trade off directly: if `MicroCDP` requires 150% collateral and a competitor only requires 110%, borrowers go where their capital works harder. Protocols are constantly tuning this dial — higher ratio is safer but less efficient; lower ratio is more capital-efficient but riskier.
+
+### 7. Risk Management
+
+`MicroCDP`'s risk model is "ETH, one Chainlink feed, done." Real protocols have to decide which collateral types to accept at all — ETH, wstETH, cbBTC, sUSDe, USDC, RWAs — and every addition brings its own liquidity risk, oracle risk, smart-contract risk, and (for wrapped/bridged assets) bridge risk.
+
+### 8. Monetary Policy
+
+`MicroCDP` has a 0% borrow rate, forever — which sounds generous but is actually dangerous, since borrowers never have any incentive to close a position. Real protocols use borrow interest, a savings rate, redemption fees, and stability fees to actively influence supply and demand.
+
+### 9. Governance
+
+Who's allowed to change the collateral ratio, the liquidation bonus, the oracle, the borrow rate, the debt ceiling, or which collateral is accepted? `MicroCDP` hardcodes all of it as immutable constants. In production, someone has to hold these levers — Maker's governance famously grew into something close to a central bank for its own stablecoin.
+
+### 10. Protocol Revenue And Scalability
+
+Where does the money come from to fund all of the above — the Stability Pool, the savings rate, protocol reserves? Borrow interest, liquidation penalties, PSM fees, and income from lending arms like Spark. And once the model works for ETH, the same scalability question repeats for every new collateral type: WBTC, LSTs, USDC, tokenized treasuries — each needs to be onboarded safely, not just added to a list.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>) ⬆️</p>
 
