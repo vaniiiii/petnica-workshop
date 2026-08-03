@@ -1,0 +1,21 @@
+# Compiler files
+cache/
+out/
+
+# Ignores development broadcast logs
+!/broadcast
+/broadcast/*/31337/
+/broadcast/**/dry-run/
+
+# Docs
+docs/
+
+# Dotenv file
+.env
+
+# Presenter prep notes (kept locally, not published)
+notes/
+
+# AI coding tool state (local only, not published)
+.claude/
+.codex-tmp/
