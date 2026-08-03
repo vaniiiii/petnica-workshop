@@ -1,5 +1,5 @@
 <div align="center">
-<h1>Petnica Ethereum Workshop <br>| Edition 2025 |</h1>
+<h1>Petnica Ethereum Workshop <br>| Edition 2026 |</h1>
 </div>
 
 # About
@@ -11,7 +11,8 @@ Each workshop is designed to take participants from zero to building and deployi
 ## Workshop Materials
 
 - **[2024 Workshop](./2024/)** - Previous edition materials and solutions
-- **[2025 Workshop](./2025/)** - Current workshop materials
+- **[2025 Workshop](./2025/)** - Previous edition materials and solutions
+- **[2026 Workshop](./2026/)** - Current workshop materials
 
 ## Disclaimer
 
